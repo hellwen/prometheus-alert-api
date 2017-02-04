@@ -56,13 +56,17 @@ func kapacitorAlert(r *http.Request) {
 }
 
 func httpPost(content string) ([]byte, error) {
-        wechat_url := os.Getenv("WECHAT_URL")
-
-	if wechat_url == "" {
-		return nil, errors.New("wechat_url is null! Please set the env var WECHAT_URL")
+        msg_tos := os.Getenv("MSG_TOS")
+	if msg_tos == "" {
+		return nil, errors.New("msg_tos is null! Please set the env var MSG_TOS")
 	}
 
-	resp, err := http.Post(wechat_url, "application/x-www-form-urlencoded", strings.NewReader("tos=2&content=" + content))
+        msg_url := os.Getenv("MSG_URL")
+	if msg_url == "" {
+		return nil, errors.New("msg_url is null! Please set the env var MSG_URL")
+	}
+
+	resp, err := http.Post(msg_url, "application/x-www-form-urlencoded", strings.NewReader("tos=" + msg_tos + "&content=" + content))
 
 	if err != nil {
 		return nil, err
