@@ -22,6 +22,7 @@ func init() {
 	r.Group("/api/alert", func(r martini.Router) {
 		r.Post("/dba", alertDBA)
 		r.Post("/ops", alertOPS)
+		r.Post("/:id", alertID)
 	})
 	// r.Post(`/api/alert/ops`, kapacitorAlert)
 	// r.Post(`/api/alert/dba`, kapacitorAlert)
@@ -31,31 +32,29 @@ func init() {
 
 func alertDBA(r *http.Request) {
 	log.Printf("alert to dba...")
-
-        message := kapacitorMessage(r)
-
-	log.Printf("message: %s", message)
-
-	msg_url := getMsgUrl()
-	resp, err := httpPost("6", msg_url, message)
-	if err != nil {
-		log.Println(err)
-		log.Println("Message not sended!")
-	} else if resp != nil {
-		log.Printf("respone: %s", string(resp))
-	}
+	alert(r, "6")
 }
 
 func alertOPS(r *http.Request) {
         log.Printf("alert to ops...")
+	alert(r, "5")
+}
 
-        message := kapacitorMessage(r)
+func alertID(r *http.Request, params martini.Params) {
+	alert_id := params["id"]
 
-        log.Printf("message: %s", message)
+	log.Printf("alert to %v...", alert_id)
+	alert(r, alert_id)
+}
 
-        msg_url := getMsgUrl()
-        resp, err := httpPost("5", msg_url, message)
-        if err != nil {
+func alert(r *http.Request, alert_id string) {
+	message := kapacitorMessage(r)
+
+	log.Printf("message: %s", message)
+
+	msg_url := getMsgUrl()
+	resp, err := httpPost(alert_id, msg_url, message)
+	if err != nil {
                 log.Println(err)
                 log.Println("Message not sended!")
         } else if resp != nil {
