@@ -6,6 +6,8 @@ import (
 	"strings"
 	"net/http"
 	"io/ioutil"
+	"time"
+	"fmt"
 	"github.com/go-martini/martini"
 	"github.com/bitly/go-simplejson"
 )
@@ -49,6 +51,10 @@ func alertID(r *http.Request, params martini.Params) {
 
 func alert(r *http.Request, alert_id string) {
 	message := kapacitorMessage(r)
+
+        loc, _:= time.LoadLocation("Asia/Shanghai")
+        f1 := "2006-01-02 15:04:05 Mon"
+        message = fmt.Sprintf("%v at %v", message, time.Now().In(loc).Format(f1))
 
 	log.Printf("message: %s", message)
 
