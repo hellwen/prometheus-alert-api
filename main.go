@@ -77,7 +77,7 @@ func getMsgUrl() string {
         return msg_url
 }
 
-func kapacitorMessage(r *http.Request) string {
+func prometheusMessage(r *http.Request) string {
 	defer r.Body.Close()
 	jsbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -93,7 +93,7 @@ func kapacitorMessage(r *http.Request) string {
 
 	// log.Printf("body: %s", body)
 
-	return js.Get("message").MustString()
+	return js.Get("alerts").MustString()
 }
 
 func httpPost(tos string, url string, content string) ([]byte, error) {
@@ -108,5 +108,5 @@ func httpPost(tos string, url string, content string) ([]byte, error) {
 }
 
 func main() {
-	m.Run()
+	m.RunOnAddr(80)
 }
