@@ -26,9 +26,6 @@ func init() {
 		r.Post("/ops", alertOPS)
 		r.Post("/:id", alertID)
 	})
-	// r.Post(`/api/alert/ops`, kapacitorAlert)
-	// r.Post(`/api/alert/dba`, kapacitorAlert)
-	// Add the router action
 	m.Action(r.Handle)
 }
 
@@ -50,7 +47,7 @@ func alertID(r *http.Request, params martini.Params) {
 }
 
 func alert(r *http.Request, alert_id string) {
-	message := kapacitorMessage(r)
+	message := prometheusMessage(r)
 
         loc, _:= time.LoadLocation("Asia/Shanghai")
         f1 := "2006-01-02 15:04:05 Mon"
