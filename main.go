@@ -108,5 +108,5 @@ func httpPost(tos string, url string, content string) ([]byte, error) {
 }
 
 func main() {
-	m.RunOnAddr(80)
+        m.RunOnAddr(":80")
 }
