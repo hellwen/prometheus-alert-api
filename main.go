@@ -101,7 +101,7 @@ func prometheusMessage(r *http.Request) string {
 		startsAt := na["startsAt"]
 		endsAt := na["endsAt"]
 
-		msg = msg + "##" + labels + "|" + annotations + "|" + startsAt + "|" + endsAt
+        	msg = fmt.Sprintf("%v --- %v,%v,%v,%v", msg, labels, annotations, startsAt, endsAt)
 	}
 
 	return msg
