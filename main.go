@@ -90,7 +90,14 @@ func prometheusMessage(r *http.Request) string {
 
 	// log.Printf("body: %s", body)
 
-	return js.Get("alerts").MustString()
+	msg := ""
+	msg = msg + js.Get("externalURL").MustString()
+	msg = msg + js.Get("alerts").Get("labels").MustString()
+	msg = msg + js.Get("alerts").Get("annotations").MustString()
+	msg = msg + js.Get("alerts").Get("startsAt").MustString()
+	msg = msg + js.Get("alerts").Get("endsAt").MustString()
+
+	return msg
 }
 
 func httpPost(tos string, url string, content string) ([]byte, error) {
