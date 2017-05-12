@@ -141,8 +141,8 @@ func prometheusMessage(r *http.Request) string {
 		annotation := fmt.Sprintf("%v", annotations["description"])
 		// log.Printf("annotation: %v", annotation)
 
-		generatorURL := fmt.Sprintf("%v", na["generatorURL"])
-		generatorURL = re.ReplaceAllString(generatorURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32012")
+		// generatorURL := fmt.Sprintf("%v", na["generatorURL"])
+		// generatorURL = re.ReplaceAllString(generatorURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32012")
 
 		startsAt := fmt.Sprintf("%v", na["startsAt"])
         	loc, _:= time.LoadLocation("Asia/Shanghai")
@@ -151,7 +151,8 @@ func prometheusMessage(r *http.Request) string {
 		startsAt_local := t.In(loc).Format(f1)
 		log.Printf("time: %v\n%v\n%v", startsAt, startsAt_local)
 
-		msg = fmt.Sprintf("%v\n%v) %v\nurl: %v\nstartsAt: %v", msg, i, annotation, generatorURL, startsAt_local)
+		// msg = fmt.Sprintf("%v\n%v) %v\nurl: %v\nstartsAt: %v", msg, i, annotation, generatorURL, startsAt_local)
+		msg = fmt.Sprintf("%v\n%v) %v\nstartsAt: %v", msg, i, annotation, startsAt_local)
 	}
 
 	return msg
