@@ -126,6 +126,7 @@ func prometheusMessage(r *http.Request) string {
 	for i, a := range alerts {
 		na, _ := a.(map[string]interface{})  
 
+		/*
 		label := ""
 		labels, _ := na["labels"].(map[string]interface{})
 		for k, v := range labels {
@@ -136,6 +137,7 @@ func prometheusMessage(r *http.Request) string {
 			}
 		}
 		log.Printf("label: %v", label)
+		*/
 
 		annotations := na["annotations"].(map[string]interface{})
 		annotation := fmt.Sprintf("%v", annotations["description"])
@@ -149,7 +151,6 @@ func prometheusMessage(r *http.Request) string {
         	f1 := "2006-01-02 15:04:05 Mon"
 		t, _ := time.Parse(time.RFC3339, startsAt)
 		startsAt_local := t.In(loc).Format(f1)
-		log.Printf("time: %v\n%v\n%v", startsAt, startsAt_local)
 
 		// msg = fmt.Sprintf("%v\n%v) %v\nurl: %v\nstartsAt: %v", msg, i, annotation, generatorURL, startsAt_local)
 		msg = fmt.Sprintf("%v\n%v) %v\nstartsAt: %v", msg, i, annotation, startsAt_local)
