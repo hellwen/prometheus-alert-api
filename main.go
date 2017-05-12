@@ -108,7 +108,7 @@ func prometheusMessage(r *http.Request) string {
 		}
 
 		annotations := na["annotations"].(map[string]interface{})
-		annotation := fmt.Sprintf("%v", annotations["summary"])
+		annotation := fmt.Sprintf("%v\ndesc: %v", annotations["summary"], annotations["description"])
 
 		msg = fmt.Sprintf("%v%v->%v\nlabels:\n%v\n", msg, i, annotation, label)
 	}
