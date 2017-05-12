@@ -102,7 +102,7 @@ func prometheusMessage(r *http.Request) string {
 	commonAnnotation := ""
 	for k, v := range commonAnnotations {
 		if commonAnnotation != "" {
-       			commonAnnotation = fmt.Sprintf("%v\n %v: %v", commonAnnotation, k, v)
+       			commonAnnotation = fmt.Sprintf("%v\n%v: %v", commonAnnotation, k, v)
 		} else {
         		commonAnnotation = fmt.Sprintf("%v: %v", k, v)
 		}
