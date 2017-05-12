@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"time"
 	"fmt"
-	"regexp"
+	// "regexp"
 	"github.com/go-martini/martini"
 	"github.com/bitly/go-simplejson"
 )
@@ -119,7 +119,7 @@ func prometheusMessage(r *http.Request) string {
 
 	msg = fmt.Sprintf("[%v]\n%v\nLabels:\n%v", status, commonAnnotation, commonLabel)
 
-	re, _ := regexp.Compile("http://prometheus.*9090")
+	// re, _ := regexp.Compile("http://prometheus.*9090")
 
 	msg = fmt.Sprintf("%v\nDetail:", msg)
 	alerts, _ := js.Get("alerts").Array()
