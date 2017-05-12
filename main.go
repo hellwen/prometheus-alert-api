@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"time"
 	"fmt"
+	"regexp"
 	"github.com/go-martini/martini"
 	"github.com/bitly/go-simplejson"
 )
@@ -49,10 +50,6 @@ func alertID(r *http.Request, params martini.Params) {
 func alert(r *http.Request, alert_id string) {
 	message := prometheusMessage(r)
 
-        loc, _:= time.LoadLocation("Asia/Shanghai")
-        f1 := "2006-01-02 15:04:05 Mon"
-        message = fmt.Sprintf("%v at %v", message, time.Now().In(loc).Format(f1))
-
 	log.Printf("message: %s", message)
 
 	msg_url := getMsgUrl()
@@ -88,11 +85,43 @@ func prometheusMessage(r *http.Request) string {
 		log.Println(err)
         }
 
-	// log.Printf("body: %s", body)
+	// log.Printf("body: %s", jsbody)
 
 	msg := ""
-	// msg = msg + js.Get("externalURL").MustString()
 
+	status := js.Get("status").MustString()
+	// receiver := js.Get("receiver").MustString()
+	groupLabels, _ := js.Get("groupLabels").Map()
+	commonLabels, _ := js.Get("commonLabels").Map()
+	commonAnnotations, _ := js.Get("commonAnnotations").Map()
+	// externalURL := js.Get("externalURL").MustString()
+
+	log.Printf("request data:")
+	log.Printf("groupLabels: %v", groupLabels)
+
+	commonAnnotation := ""
+	for k, v := range commonAnnotations {
+		if commonAnnotation != "" {
+       			commonAnnotation = fmt.Sprintf("%v\n %v: %v", commonAnnotation, k, v)
+		} else {
+        		commonAnnotation = fmt.Sprintf("%v: %v", k, v)
+		}
+	}
+
+	commonLabel := ""
+	for k, v := range commonLabels {
+		if commonLabel != "" {
+       			commonLabel = fmt.Sprintf("%v\n %v: [%v]", commonLabel, k, v)
+		} else {
+        		commonLabel = fmt.Sprintf(" %v: [%v]", k, v)
+		}
+	}
+
+	msg = fmt.Sprintf("[%v]\n%v\nLabels:\n%v", status, commonAnnotation, commonLabel)
+
+	re, _ := regexp.Compile("http://prometheus.*9090")
+
+	msg = fmt.Sprintf("%v\nDetail:", msg)
 	alerts, _ := js.Get("alerts").Array()
 	for i, a := range alerts {
 		na, _ := a.(map[string]interface{})  
@@ -101,16 +130,28 @@ func prometheusMessage(r *http.Request) string {
 		labels, _ := na["labels"].(map[string]interface{})
 		for k, v := range labels {
 			if label != "" {
-        			label = fmt.Sprintf("%v\n %v: %v", label, k, v)
+        			label = fmt.Sprintf("%v\n %v: [%v]", label, k, v)
 			} else {
-        			label = fmt.Sprintf(" %v: %v", k, v)
+        			label = fmt.Sprintf(" %v: [%v]", k, v)
 			}
 		}
+		log.Printf("label: %v", label)
 
 		annotations := na["annotations"].(map[string]interface{})
-		annotation := fmt.Sprintf("%v\ndesc: %v", annotations["summary"], annotations["description"])
+		annotation := fmt.Sprintf("%v", annotations["description"])
+		// log.Printf("annotation: %v", annotation)
 
-		msg = fmt.Sprintf("%v%v->%v\nlabels:\n%v\n", msg, i, annotation, label)
+		generatorURL := fmt.Sprintf("%v", na["generatorURL"])
+		generatorURL = re.ReplaceAllString(generatorURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32012")
+
+		startsAt := fmt.Sprintf("%v", na["startsAt"])
+        	loc, _:= time.LoadLocation("Asia/Shanghai")
+        	f1 := "2006-01-02 15:04:05 Mon"
+		t, _ := time.Parse(time.RFC3339, startsAt)
+		startsAt_local := t.In(loc).Format(f1)
+		log.Printf("time: %v\n%v\n%v", startsAt, startsAt_local)
+
+		msg = fmt.Sprintf("%v\n%v) %v\nurl: %v\nstartsAt: %v", msg, i, annotation, generatorURL, startsAt_local)
 	}
 
 	return msg
@@ -128,5 +169,5 @@ func httpPost(tos string, url string, content string) ([]byte, error) {
 }
 
 func main() {
-        m.RunOnAddr(":80")
+        m.RunOnAddr(":8080")
 }
