@@ -94,25 +94,25 @@ func prometheusMessage(r *http.Request) string {
 	// msg = msg + js.Get("externalURL").MustString()
 
 	alerts, _ := js.Get("alerts").Array()
-	for _, a := range alerts {
+	for i, a := range alerts {
 		na, _ := a.(map[string]interface{})  
 
 		label := ""
 		labels, _ := na["labels"].(map[string]interface{})
 		for k, v := range labels {
 			if label != "" {
-        			label = fmt.Sprintf("%v,%v:%v", label, k, v)
+        			label = fmt.Sprintf("%v\n%v:%v", label, k, v)
 			} else {
         			label = fmt.Sprintf("%v:%v", k, v)
 			}
 		}
 
 		annotations := na["annotations"].(map[string]interface{})
-        	annotation := fmt.Sprintf("%v[%v]", annotations["summary"], annotations["description"])
+		annotation := fmt.Sprintf("%v", annotations["summary"])
 
 		startsAt := na["startsAt"]
 
-        	msg = fmt.Sprintf("%v \n--> %v tags:[%v] at [%v]", msg, annotation, label, startsAt)
+		msg = fmt.Sprintf("%v-%v->\n%v\nlabels:[\n%v]\nat: %v\n", msg, i, annotation, label, startsAt)
 	}
 
 	return msg
