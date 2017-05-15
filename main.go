@@ -133,11 +133,11 @@ func prometheusMessage(r *http.Request) string {
 	msg = fmt.Sprintf("[%v]\n%v\nLabels:\n%v", status, commonAnnotation, commonLabel)
 	*/
 
-	msg = fmt.Sprintf("# [%v](%v)\n%v\n", status, externalURL, commonAnnotation)
+	msg = fmt.Sprintf("# [%v] [view](%v)\n%v\n", status, externalURL, commonAnnotation)
 
 	gurl_re, _ := regexp.Compile("http://prometheus.*9090")
 
-	msg = fmt.Sprintf("%v\n# Detail:", msg)
+	msg = fmt.Sprintf("%v\n# Detail", msg)
 	alerts, _ := js.Get("alerts").Array()
 	
 	for i, a := range alerts {
@@ -167,7 +167,7 @@ func prometheusMessage(r *http.Request) string {
 		startsAt_local := localTime(startsAt)
 
 		if len(alerts) > 1 {
-			msg = fmt.Sprintf("%v\n\n>%v)\n>%v\n>startsAt: %v\n>[view](%v)", msg, i, annotation, startsAt_local, generatorURL)
+			msg = fmt.Sprintf("%v\n > %v) \n>%v\n>startsAt: %v\n>[view](%v)", msg, i, annotation, startsAt_local, generatorURL)
 		} else {
 			msg = fmt.Sprintf("%v\nstartsAt: %v\n[view](%v)", msg, annotation, startsAt_local, generatorURL)
 		}
