@@ -1,0 +1,23 @@
+{
+    "receiver":"test",
+    "status":"firing",
+    "alerts":[
+        {"status":"firing",
+            "labels":{"alertname":"K8sControllerMemoryHight","container_name":"heapster","controller":"heapster-1849934443","namespace":"mon","service":"k8s", "severity":"warning"},
+            "annotations":{"description":"pod heapster-1849934443 memory 32.35546875 is higher than 70%.","summary":"K8s pod memory is hight"},
+            "startsAt":"2017-05-12T07:10:37.803Z","endsAt":"0001-01-01T00:00:00Z","generatorURL":"http://prometheus-3072245990-wfwq9:9090/graph?g0.            expr=sum%28r_cluster_namespace_instance_controller_pod_container%3Amemory_usage%3Abytes%29+BY+%28cluster%2C+namespace%2C+controller%2C+container_name%29+%2F+  sum%28r_cluster_namespace_instance_controller_pod_container%3Aspec_memory_limit_bytes+%21%3D+0%29+BY+%28cluster%2C+namespace%2C+controller%2C+                 container_name%29+%2A+100+%3E+30\u0026g0.tab=0"
+        },
+        {"status":"firing",
+            "labels":{"alertname":"K8sControllerMemoryHight","container_name":"kube-state-metrics","controller":"kube-state-metrics-2346492623","namespace":   "mon","service":"k8s","severity":"warning"},
+            "annotations":{"description":"pod kube-state-metrics-2346492623 memory 73.26962457337885 is higher than 70%.","summary":"K8s pod memory is hight"},            "startsAt":"2017-05-12T07:10:37.803Z",
+            "endsAt":"0001-01-01T00:00:00Z",
+            "generatorURL":"http://prometheus-3072245990-wfwq9:9090/graph?g0.                                                                                  expr=sum%28r_cluster_namespace_instance_controller_pod_container%3Amemory_usage%3Abytes%29+BY+%28cluster%2C+namespace%2C+controller%2C+container_name%29+%2F+  sum%28r_cluster_namespace_instance_controller_pod_container%3Aspec_memory_limit_bytes+%21%3D+0%29+BY+%28cluster%2C+namespace%2C+controller%2C+                 container_name%29+%2A+100+%3E+30\u0026g0.tab=0"
+        }
+    ],
+    "groupLabels":{"alertname":"K8sControllerMemoryHight","service":"k8s"},
+    "commonLabels":{"alertname":"K8sControllerMemoryHight","service":"k8s","severity":"warning"},
+    "commonAnnotations":{"summary":"K8s pod memory is hight"},
+    "externalURL":"http://alertmanager-1878102904-fvdsm:9093",
+    "version":"4",
+    "groupKey":"{}/{service=~\"^(?:k8s)$\"}:{alertname=\"K8sControllerMemoryHight\", service=\"k8s\"}"
+}

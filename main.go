@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"time"
 	"fmt"
-	// "regexp"
+	"regexp"
 	"github.com/go-martini/martini"
 	"github.com/bitly/go-simplejson"
 )
@@ -28,6 +28,13 @@ func init() {
 		r.Post("/:id", alertID)
 	})
 	m.Action(r.Handle)
+}
+
+func localTime(sourceTime string) (string) {
+	loc, _:= time.LoadLocation("Asia/Shanghai")
+	f1 := "2006-01-02 15:04:05 Mon"
+	t, _ := time.Parse(time.RFC3339, sourceTime)
+	return t.In(loc).Format(f1)
 }
 
 func alertDBA(r *http.Request) {
@@ -64,6 +71,7 @@ func alert(r *http.Request, alert_id string) {
 
 func getMsgUrl() string {
         msg_url := os.Getenv("MSG_URL")
+        // msg_url = "https://oapi.dingtalk.com/robot/send?access_token=f3e4ba2d28e282518b44eafb45761e1f237f70f2af4cc77db4cfde838101f5a5"
 	if msg_url == "" {
 		log.Printf("msg_url is null! Please set the env var MSG_URL")
 	}
@@ -92,7 +100,7 @@ func prometheusMessage(r *http.Request) string {
 	status := js.Get("status").MustString()
 	// receiver := js.Get("receiver").MustString()
 	groupLabels, _ := js.Get("groupLabels").Map()
-	commonLabels, _ := js.Get("commonLabels").Map()
+	// commonLabels, _ := js.Get("commonLabels").Map()
 	commonAnnotations, _ := js.Get("commonAnnotations").Map()
 	// externalURL := js.Get("externalURL").MustString()
 
@@ -108,6 +116,7 @@ func prometheusMessage(r *http.Request) string {
 		}
 	}
 
+	/*
 	commonLabel := ""
 	for k, v := range commonLabels {
 		if commonLabel != "" {
@@ -118,11 +127,15 @@ func prometheusMessage(r *http.Request) string {
 	}
 
 	msg = fmt.Sprintf("[%v]\n%v\nLabels:\n%v", status, commonAnnotation, commonLabel)
+	*/
 
-	// re, _ := regexp.Compile("http://prometheus.*9090")
+	msg = fmt.Sprintf("# [%v]\n%v", status, commonAnnotation)
+
+	re, _ := regexp.Compile("http://prometheus.*9090")
 
 	msg = fmt.Sprintf("%v\nDetail:", msg)
 	alerts, _ := js.Get("alerts").Array()
+	
 	for i, a := range alerts {
 		na, _ := a.(map[string]interface{})  
 
@@ -131,9 +144,9 @@ func prometheusMessage(r *http.Request) string {
 		labels, _ := na["labels"].(map[string]interface{})
 		for k, v := range labels {
 			if label != "" {
-        			label = fmt.Sprintf("%v\n %v: [%v]", label, k, v)
+       				label = fmt.Sprintf("%v\n %v: [%v]", label, k, v)
 			} else {
-        			label = fmt.Sprintf(" %v: [%v]", k, v)
+       				label = fmt.Sprintf(" %v: [%v]", k, v)
 			}
 		}
 		log.Printf("label: %v", label)
@@ -143,24 +156,27 @@ func prometheusMessage(r *http.Request) string {
 		annotation := fmt.Sprintf("%v", annotations["description"])
 		// log.Printf("annotation: %v", annotation)
 
-		// generatorURL := fmt.Sprintf("%v", na["generatorURL"])
-		// generatorURL = re.ReplaceAllString(generatorURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32012")
+		generatorURL := fmt.Sprintf("%v", na["generatorURL"])
+		generatorURL = re.ReplaceAllString(generatorURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32012")
 
 		startsAt := fmt.Sprintf("%v", na["startsAt"])
-        	loc, _:= time.LoadLocation("Asia/Shanghai")
-        	f1 := "2006-01-02 15:04:05 Mon"
-		t, _ := time.Parse(time.RFC3339, startsAt)
-		startsAt_local := t.In(loc).Format(f1)
+		startsAt_local := localTime(startsAt)
 
-		// msg = fmt.Sprintf("%v\n%v) %v\nurl: %v\nstartsAt: %v", msg, i, annotation, generatorURL, startsAt_local)
-		msg = fmt.Sprintf("%v\n%v) %v\nstartsAt: %v", msg, i, annotation, startsAt_local)
+		if len(alerts) > 1 {
+			msg = fmt.Sprintf("%v\n>%v)\n>%v\n>startsAt: %v\n>[view](%v)", msg, i, annotation, startsAt_local, generatorURL)
+		} else {
+			msg = fmt.Sprintf("%v\nstartsAt: %v\n[view](%v)", msg, annotation, startsAt_local, generatorURL)
+		}
 	}
 
+	title := "kubernetes alert"
+	msg = fmt.Sprintf("{\"msgtype\":\"markdown\",\"markdown\":{\"title\": \"%v\",\"text\":\"%v\"}}", title, msg)
 	return msg
 }
 
 func httpPost(tos string, url string, content string) ([]byte, error) {
-	resp, err := http.Post(url, "application/x-www-form-urlencoded", strings.NewReader("tos=" + tos + "&content=" + content))
+	// resp, err := http.Post(url, "application/x-www-form-urlencoded", strings.NewReader("tos=" + tos + "&content=" + content))
+	resp, err := http.Post(url, "application/json", strings.NewReader(content))
 
 	if err != nil {
 		return nil, err
