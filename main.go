@@ -102,7 +102,11 @@ func prometheusMessage(r *http.Request) string {
 	groupLabels, _ := js.Get("groupLabels").Map()
 	// commonLabels, _ := js.Get("commonLabels").Map()
 	commonAnnotations, _ := js.Get("commonAnnotations").Map()
-	// externalURL := js.Get("externalURL").MustString()
+
+	eurl_re, _ := regexp.Compile("http://alertmanager.*9093")
+
+	externalURL := js.Get("externalURL").MustString()
+	externalURL = eurl_re.ReplaceAllString(externalURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32013")
 
 	log.Printf("request data:")
 	log.Printf("groupLabels: %v", groupLabels)
@@ -129,11 +133,11 @@ func prometheusMessage(r *http.Request) string {
 	msg = fmt.Sprintf("[%v]\n%v\nLabels:\n%v", status, commonAnnotation, commonLabel)
 	*/
 
-	msg = fmt.Sprintf("# [%v]\n%v", status, commonAnnotation)
+	msg = fmt.Sprintf("# [%v](%v)\n%v\n", status, externalURL, commonAnnotation)
 
-	re, _ := regexp.Compile("http://prometheus.*9090")
+	gurl_re, _ := regexp.Compile("http://prometheus.*9090")
 
-	msg = fmt.Sprintf("%v\nDetail:", msg)
+	msg = fmt.Sprintf("%v\n# Detail:", msg)
 	alerts, _ := js.Get("alerts").Array()
 	
 	for i, a := range alerts {
@@ -157,13 +161,13 @@ func prometheusMessage(r *http.Request) string {
 		// log.Printf("annotation: %v", annotation)
 
 		generatorURL := fmt.Sprintf("%v", na["generatorURL"])
-		generatorURL = re.ReplaceAllString(generatorURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32012")
+		generatorURL = gurl_re.ReplaceAllString(generatorURL, "http://k8s.gz.1253104200.clb.myqcloud.com:32012")
 
 		startsAt := fmt.Sprintf("%v", na["startsAt"])
 		startsAt_local := localTime(startsAt)
 
 		if len(alerts) > 1 {
-			msg = fmt.Sprintf("%v\n>%v)\n>%v\n>startsAt: %v\n>[view](%v)", msg, i, annotation, startsAt_local, generatorURL)
+			msg = fmt.Sprintf("%v\n\n>%v)\n>%v\n>startsAt: %v\n>[view](%v)", msg, i, annotation, startsAt_local, generatorURL)
 		} else {
 			msg = fmt.Sprintf("%v\nstartsAt: %v\n[view](%v)", msg, annotation, startsAt_local, generatorURL)
 		}
