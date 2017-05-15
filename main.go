@@ -167,9 +167,9 @@ func prometheusMessage(r *http.Request) string {
 		startsAt_local := localTime(startsAt)
 
 		if len(alerts) > 1 {
-			msg = fmt.Sprintf("%v\n>%v)\n>%v\n>startsAt: %v\n>[view](%v)", msg, i, annotation, startsAt_local, generatorURL)
+			msg = fmt.Sprintf("%v\n\n>%v) \n>%v\n>startsAt: %v\n>[view](%v)", msg, i, annotation, startsAt_local, generatorURL)
 		} else {
-			msg = fmt.Sprintf("%v\nstartsAt: %v\n[view](%v)", msg, annotation, startsAt_local, generatorURL)
+			msg = fmt.Sprintf("%v\n>startsAt: %v\n>[view](%v)", msg, startsAt_local, generatorURL)
 		}
 	}
 
